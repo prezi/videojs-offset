@@ -56,6 +56,29 @@ const onPlayerReady = (player, options) => {
   player.one('play', () => {
     player.on('timeupdate', onPlayerTimeUpdate);
   });
+
+  const isOutside = () => options.offsetEnd != null && player.currentTime() + 0.001 >= options._offsetEnd - (options._offsetStart || 0);
+
+  player.on('pause', () => {
+    if (isOutside()) {
+      player.trigger('loadstart');
+    }
+  });
+  player.on('play', () => {
+    if (isOutside()) {
+      player.currentTime(0);
+    }
+  });
+  player.on('canplay', () => {
+    if (isOutside()) {
+      player.trigger('ended');
+    }
+  });
+  player.on('canplaythrough', () => {
+    if (isOutside()) {
+      player.trigger('ended');
+    }
+  });
 };
 
 /**
@@ -71,6 +94,7 @@ const onPlayerReady = (player, options) => {
  *           An object of options left to the plugin author to define.
  */
 const offset = function(options) {
+  console.log('!!! BINGO');
   options = options || {};
   const Player = this.constructor;
 
@@ -150,6 +174,8 @@ const offset = function(options) {
 };
 
 // Register the plugin with video.js.
+
+console.log('!!! plugin registered');
 registerPlugin('offset', offset);
 // Include the version number.
 offset.VERSION = VERSION;
